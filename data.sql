@@ -1,4 +1,4 @@
-\c messagely
+\c messagely_test
 
 CREATE TABLE users
 (

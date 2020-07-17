@@ -3,6 +3,7 @@
 const { DB_URI, BCRYPT_WORK_FACTOR } = require('../config');
 const bcrypt = require('bcrypt');
 const ExpressError = require('../expressError');
+const db = require('../db');
 
 /** User of the site. */
 
@@ -20,8 +21,10 @@ class User {
           password,
           first_name,
           last_name, 
-          phone)
-          VALUES ($1, $2, $3, $4, $5)
+          phone, 
+          join_at, 
+          last_login_at)
+          VALUES ($1, $2, $3, $4, $5, current_timestamp, current_timestamp)
           RETURNING username, password, first_name, last_name, phone
         `,
 			[ username, hashedPassword, first_name, last_name, phone ]
@@ -105,13 +108,14 @@ class User {
 	static async messagesFrom(username) {
 		if (!username) throw new ExpressError('username required', 400);
 		const results = await db.query(
-			`SELECT id, to_user, body, sent_at, read_at
+			`SELECT id, to_username, body, sent_at, read_at
       FROM messages
-      WHERE to_user = $1
+      WHERE from_username = $1
       `,
 			[ username ]
 		);
-		if (!result.rows.length) throw new ExpressError('Messages not found', 404);
+		if (!results.rows.length) throw new ExpressError('Messages not found', 404);
+		console.log(results.rows);
 		const messages = results.rows;
 		return messages;
 	}
@@ -127,13 +131,13 @@ class User {
 	static async messagesTo(username) {
 		if (!username) throw new ExpressError('username required', 400);
 		const results = await db.query(
-			`SELECT id, from_user, body, sent_at, read_at
+			`SELECT id, from_username, body, sent_at, read_at
       FROM messages
-      WHERE from_user = $1
+      WHERE to_username = $1
       `,
 			[ username ]
 		);
-		if (!result.rows.length) throw new ExpressError('Messages not found', 404);
+		if (!results.rows.length) throw new ExpressError('Messages not found', 404);
 		const messages = results.rows;
 		return messages;
 	}
