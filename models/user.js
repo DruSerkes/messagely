@@ -22,7 +22,7 @@ class User {
           last_name, 
           phone)
           VALUES ($1, $2, $3, $4, $5)
-          RETURNING id, username, password, first_name AS firstName, last_name AS lastName, phone
+          RETURNING username, password, first_name, last_name, phone
         `,
 			[ username, hashedPassword, first_name, last_name, phone ]
 		);
@@ -35,7 +35,7 @@ class User {
 	static async authenticate(username, password) {
 		if (!username || !password) throw new ExpressError('username/password required', 400);
 		const result = await db.query(
-			`SELECT id, username, password
+			`SELECT username, password
         FROM users
         WHERE username = $1
         `,
@@ -62,7 +62,15 @@ class User {
 	/** All: basic info on all users:
    * [{username, first_name, last_name, phone}, ...] */
 
-	static async all() {}
+	static async all() {
+		const results = await db.query(
+			`SELECT username, first_name, last_name, phone
+      FROM users
+      `
+		);
+		const users = results.rows;
+		return users;
+	}
 
 	/** Get: get user by username
    *
@@ -73,7 +81,18 @@ class User {
    *          join_at,
    *          last_login_at } */
 
-	static async get(username) {}
+	static async get(username) {
+		if (!username) throw new ExpressError('username required', 400);
+		const result = await db.query(
+			`SELECT username, first_name, last_name, phone, join_at, last_login_at
+      FROM users
+      WHERE username = $1
+      `,
+			[ username ]
+		);
+		const user = result.rows[0];
+		return user;
+	}
 
 	/** Return messages from this user.
    *
@@ -83,7 +102,9 @@ class User {
    *   {username, first_name, last_name, phone}
    */
 
-	static async messagesFrom(username) {}
+	static async messagesFrom(username) {
+		if (!username) throw new ExpressError('username required', 400);
+	}
 
 	/** Return messages to this user.
    *
@@ -93,7 +114,9 @@ class User {
    *   {id, first_name, last_name, phone}
    */
 
-	static async messagesTo(username) {}
+	static async messagesTo(username) {
+		if (!username) throw new ExpressError('username required', 400);
+	}
 }
 
 module.exports = User;
