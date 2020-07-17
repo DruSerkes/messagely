@@ -104,6 +104,16 @@ class User {
 
 	static async messagesFrom(username) {
 		if (!username) throw new ExpressError('username required', 400);
+		const results = await db.query(
+			`SELECT id, to_user, body, sent_at, read_at
+      FROM messages
+      WHERE to_user = $1
+      `,
+			[ username ]
+		);
+		if (!result.rows.length) throw new ExpressError('Messages not found', 404);
+		const messages = results.rows;
+		return messages;
 	}
 
 	/** Return messages to this user.
@@ -116,6 +126,16 @@ class User {
 
 	static async messagesTo(username) {
 		if (!username) throw new ExpressError('username required', 400);
+		const results = await db.query(
+			`SELECT id, from_user, body, sent_at, read_at
+      FROM messages
+      WHERE from_user = $1
+      `,
+			[ username ]
+		);
+		if (!result.rows.length) throw new ExpressError('Messages not found', 404);
+		const messages = results.rows;
+		return messages;
 	}
 }
 
