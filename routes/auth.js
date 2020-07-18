@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const User = require('../models/user');
 const jwt = require('jsonwebtoken');
+const ExpressError = require('../expressError');
 const { SECRET_KEY, BCRYPT_WORK_FACTOR } = require('../config');
 // const { Router } = require('express');
 
@@ -15,7 +16,7 @@ router.post('/login', async (req, res, next) => {
 	try {
 		const { username, password } = req.body;
 		if (await User.authenticate(username, password)) {
-			await User.updateLoginTimestamp(user);
+			await User.updateLoginTimestamp(username);
 			const token = jwt.sign({ username }, SECRET_KEY);
 			return res.json({ token });
 		}
@@ -35,7 +36,7 @@ router.post('/login', async (req, res, next) => {
 router.post('/register', async (req, res, next) => {
 	try {
 		const { username, password, first_name, last_name, phone } = req.body;
-		const user = await User.register(username, password, first_name, last_name, phone);
+		const user = await User.register({ username, password, first_name, last_name, phone });
 		const token = jwt.sign({ username: user.username }, SECRET_KEY);
 		return res.json({ token });
 	} catch (e) {
