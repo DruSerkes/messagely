@@ -108,16 +108,27 @@ class User {
 	static async messagesFrom(username) {
 		if (!username) throw new ExpressError('username required', 400);
 		const results = await db.query(
-			`SELECT id, to_username, body, sent_at, read_at
-      FROM messages
+			`SELECT m.id, m.body, m.sent_at, m.read_at, u.username, u.first_name, u.last_name, u.phone 
+	  FROM messages AS m
+	  JOIN users AS u ON m.to_username = u.username 
       WHERE from_username = $1
       `,
 			[ username ]
 		);
 		if (!results.rows.length) throw new ExpressError('Messages not found', 404);
-		console.log(results.rows);
-		const messages = results.rows;
-		return messages;
+
+		return results.rows.map((m) => ({
+			id      : m.id,
+			body    : m.body,
+			sent_at : m.sent_at,
+			read_at : m.read_at,
+			to_user : {
+				username   : m.username,
+				first_name : m.first_name,
+				last_name  : m.last_name,
+				phone      : m.phone
+			}
+		}));
 	}
 
 	/** Return messages to this user.
@@ -131,15 +142,26 @@ class User {
 	static async messagesTo(username) {
 		if (!username) throw new ExpressError('username required', 400);
 		const results = await db.query(
-			`SELECT id, from_username, body, sent_at, read_at
-      FROM messages
+			`SELECT m.id, m.body, m.sent_at, m.read_at, u.username, u.first_name, u.last_name, u.phone
+	  FROM messages AS m
+	  JOIN users AS u ON m.from_username = u.username
       WHERE to_username = $1
       `,
 			[ username ]
 		);
 		if (!results.rows.length) throw new ExpressError('Messages not found', 404);
-		const messages = results.rows;
-		return messages;
+		return results.rows.map((m) => ({
+			id        : m.id,
+			body      : m.body,
+			sent_at   : m.sent_at,
+			read_at   : m.read_at,
+			from_user : {
+				username   : m.username,
+				first_name : m.first_name,
+				last_name  : m.last_name,
+				phone      : m.phone
+			}
+		}));
 	}
 }
 
