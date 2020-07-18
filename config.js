@@ -14,10 +14,16 @@ const ACCOUNT_SID = process.env.ACCOUNT_SID;
 
 const AUTH_TOKEN = process.env.AUTH_TOKEN;
 
+const MY_PHONE_NUMBER = process.env.MY_PHONE_NUMBER;
+
+const TRIAL_NUMBER = process.env.TRIAL_NUMBER;
+
 module.exports = {
 	DB_URI,
 	SECRET_KEY,
 	BCRYPT_WORK_FACTOR,
 	ACCOUNT_SID,
-	AUTH_TOKEN
+	AUTH_TOKEN,
+	MY_PHONE_NUMBER,
+	TRIAL_NUMBER
 };
