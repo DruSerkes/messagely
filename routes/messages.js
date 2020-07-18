@@ -60,3 +60,5 @@ router.post('/:id/read', ensureCorrectUser, async (req, res, next) => {
 		return next(e);
 	}
 });
+
+module.exports = router;
